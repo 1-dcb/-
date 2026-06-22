@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Argos 本地翻译工作台</title>
+    <script>console.log('=== V2 HTML LOADED ===');</script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=zh-ui-4" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Argos 本地翻译工作台">
+        <header class="topbar">
+          <div class="brand">
+            <img src="{{ url_for('static', filename='argos-icon.png') }}" alt="" />
+            <div>
+              <p class="eyebrow">本地离线翻译工具</p>
+              <h1>Argos 翻译工作台 <span style="color:#e36c4f;font-size:14px;vertical-align:super">V2</span></h1>
+            </div>
+          </div>
+          <div class="status-pill" id="statusPill">
+            <span class="status-dot"></span>
+            <span id="statusText">正在检测引擎</span>
+          </div>
+        </header>
+
+        <section class="runtime-strip" aria-label="运行状态">
+          <div class="metric">
+            <span class="metric-label">翻译引擎</span>
+            <strong id="engineName">检测中</strong>
+          </div>
+          <div class="metric">
+            <span class="metric-label">语言数量</span>
+            <strong id="languageCount">0</strong>
+          </div>
+          <div class="metric wide">
+            <span class="metric-label">本地配置</span>
+            <p id="setupHint">正在读取运行状态...</p>
+          </div>
+        </section>
+
+        <section class="module-grid">
+          <article class="module-card translation-module" aria-label="翻译模块">
+            <div class="module-heading">
+              <div>
+                <p class="module-kicker">模块一</p>
+                <h2>文本翻译</h2>
+              </div>
+              <button class="ghost-button" id="sampleBtn" type="button">示例</button>
+            </div>
+
+            <div class="language-row">
+              <label>
+                原文语言
+                <select id="sourceLang"></select>
+              </label>
+              <button class="icon-button" id="swapBtn" type="button" title="交换语言" aria-label="交换语言">
+                交换
+              </button>
+              <label>
+                目标语言
+                <select id="targetLang"></select>
+              </label>
+            </div>
+
+            <div class="translation-panels">
+              <section class="text-panel">
+                <div class="panel-head">
+                  <span>原文</span>
+                  <button class="ghost-button" id="clearBtn" type="button">清空</button>
+                </div>
+                <textarea id="inputText" spellcheck="false" placeholder="输入要翻译的文本..."></textarea>
+                <footer>
+                  <span id="inputCount">0 个字符</span>
+                  <button class="primary-button" id="translateBtn" type="button">翻译</button>
+                </footer>
+              </section>
+
+              <section class="text-panel result-panel">
+                <div class="panel-head">
+                  <span>译文</span>
+                  <button class="ghost-button" id="copyBtn" type="button">复制</button>
+                </div>
+                <output id="outputText">翻译结果会显示在这里。</output>
+                <footer>
+                  <span id="engineMeta">等待输入</span>
+                </footer>
+              </section>
+            </div>
+          </article>
+
+          <article class="module-card transformer-module" aria-label="Transformer 原理拆解模块">
+            <div class="module-heading">
+              <div>
+                <p class="module-kicker">模块二</p>
+                <h2>Transformer 透视镜</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" id="autoPlayBtn" type="button">自动演示</button>
+                <button class="primary-button" id="analyzeBtn" type="button">可视化</button>
+              </div>
+            </div>
+
+            <!-- 步骤导航条 -->
+            <div class="stage-nav" id="stageNavDots"></div>
+
+            <div class="lab-controls">
+              <label>
+                短句输入
+                <input id="labInput" maxlength="100" value="Hello" spellcheck="false" />
+              </label>
+              <label>
+                源语言
+                <select id="labSourceLang"></select>
+              </label>
+              <button class="icon-button" id="labSwapBtn" type="button" title="交换拆解语言" aria-label="交换拆解语言">交换</button>
+              <label>
+                目标语言
+                <select id="labTargetLang"></select>
+              </label>
+              <div class="limit-meter">
+                <span id="labCount">5 / 100</span>
+                <div class="limit-track"><span id="labMeter"></span></div>
+              </div>
+            </div>
+
+            <div class="lens-board">
+              <!-- 步骤 ① 分词与位置编码 -->
+              <section class="lens-stage token-stage" id="stage1">
+                <div class="stage-title">
+                  <span>1</span>
+                  <div>
+                    <h3>分词 Tokenization + 位置编码 Positional Encoding</h3>
+                    <p><strong>分词：</strong>计算机不认识"字"，只认识"数字"。所以第一步把句子切成小片段（词元/token），每个词元分配一个编号。<br>
+                    <strong>位置编码：</strong>Transformer 没有"顺序"概念——它同时看所有词。为了让模型知道哪个词在前、哪个词在后，我们给每个位置加上一个独特的"位置指纹"（正弦波）。<br>
+                    <strong>上图曲线：</strong>4 条不同频率的正弦/余弦波。低频（波长长）区分"开头/中间/结尾"；高频（波长短）区分"相邻词的细微差异"。每条曲线上标记的点就是每个 token 取到的位置编码值。<br>
+                    <strong>下图矩阵：</strong>每个 token 在 8 个代表维度上的位置编码数值（绿色=正，橙色=负）。注意偶数列是 sin，奇数列是 cos。<br>
+                    <em>论文 §3.5：PE(pos,2i)=sin(pos/10000^(2i/d)), PE(pos,2i+1)=cos(pos/10000^(2i/d))</em></p>
+                  </div>
+                </div>
+                <div class="token-rail" id="tokenRail"></div>
+                <canvas class="pe-canvas" id="peCanvas"></canvas>
+                <div class="vector-matrix pe-matrix-scroll" id="peMatrix"></div>
+              </section>
+
+              <!-- 步骤 ② 词嵌入 + 位置编码相加 -->
+              <section class="lens-stage" id="stage2">
+                <div class="stage-title">
+                  <span>2</span>
+                  <div>
+                    <h3>词嵌入 Word Embedding + 位置编码 = Encoder 输入</h3>
+                    <p><strong>词嵌入（左）：</strong>每个词元被映射成一个 512 维的向量（这里可视化 4 个代表维度）。语义相近的词向量也相近——比如"猫"和"狗"的向量比"猫"和"电脑"更接近。<br>
+                    <strong>位置编码（中）：</strong>来自步骤①的正弦波位置信息。<br>
+                    <strong>相加 = Encoder 输入（右）：</strong>两者<strong>逐元素相加</strong>（不是拼接！）。就像给每个词的"身份信息"上盖了一个"时间戳"——模型同时知道这个词是什么意思、它在句子第几个位置。<br>
+                    <em>为什么要相加而不是拼接？相加保持了向量维度不变（始终是 512），残差连接才能正常工作。论文 §3.4 详细讨论了这一点。</em></p>
+                  </div>
+                </div>
+                <div class="vector-matrix" id="embeddingMatrix"></div>
+                <div class="combined-matrix-wrap" id="combinedMatrix"></div>
+              </section>
+
+              <!-- 步骤 ③ 多头 Q/K/V 投影 -->
+              <section class="lens-stage" id="stage3">
+                <div class="stage-title">
+                  <span>3</span>
+                  <div>
+                    <h3>多头 Q/K/V 投影 — "从不同角度审视每个词"</h3>
+                    <p><strong>Q（Query，查询）：</strong>"我在找什么？" — 当前词想从其他词那里获取什么信息。<br>
+                    <strong>K（Key，键）：</strong>"我是什么？" — 每个词给自己贴的"标签"，用来和别人的 Q 匹配。<br>
+                    <strong>V（Value，值）：</strong>"我有什么？" — 每个词携带的实际信息内容。<br>
+                    <strong>多头：</strong>只做一次注意力不够——就像只从一个角度看一个物体。Transformer 用 8 个头（这里展示 4 个），每个头有自己的 W^Q、W^K、W^V 矩阵，相当于 8 个"专家"各自从不同角度审视同一句话。<br>
+                    <strong>注意看：</strong>4 个头的 Q/K/V 柱子形状<strong>不一样</strong>——因为每个头用了不同的投影矩阵。这就是"不同视角"的数学体现。<br>
+                    <em>论文 §3.2.2：MultiHead(Q,K,V) = Concat(head_1,...,head_h)·W^O</em></p>
+                  </div>
+                </div>
+                <div class="multihead-grid" id="multiHeadGrid"></div>
+                <p class="stage-note" id="multiHeadNote"></p>
+              </section>
+
+              <!-- 步骤 ④ 多头注意力场 -->
+              <section class="lens-stage" id="stage4">
+                <div class="stage-title">
+                  <span>4</span>
+                  <div>
+                    <h3>多头注意力场 — "谁和谁最相关？"</h3>
+                    <p><strong>计算过程：</strong>Q·Kᵀ → 除以 √dₖ → softmax → 乘以 V。这就是著名的 Attention(Q,K,V)=softmax(QKᵀ/√dₖ)·V 公式。<br>
+                    <strong>热力图怎么看：</strong>每一<strong>行</strong>表示"当前词在关注哪些词"。颜色越深、百分比越高 = 关注越强。对角线通常最亮（每个词最关注自己）。<br>
+                    <strong>点击 4 个 mini 热力图切换头：</strong><br>
+                    · 头 0（邻近词）：主要看左右邻居，捕捉局部短语搭配<br>
+                    · 头 1（首词）：优先看句子第一个词，捕捉"谁/什么"这个全局主语<br>
+                    · 头 2（自身）：主要看自己，保留自身语义不被过度稀释<br>
+                    · 头 3（均匀）：对全句均匀关注，做信息汇总<br>
+                    <strong>右侧上下文向量：</strong>加权求和后的输出——"综合考虑了全句信息后，这个词的新表示"。<br>
+                    <em>论文 §3.2.1 & §3.2.2</em></p>
+                  </div>
+                </div>
+                <div class="attention-mini-grid" id="attentionMiniGrid"></div>
+                <div class="attention-wrap">
+                  <div class="attention-heatmap" id="attentionMainHeat"></div>
+                  <div class="context-stack" id="contextStack"></div>
+                </div>
+              </section>
+
+              <!-- 步骤 ⑤ FFN -->
+              <section class="lens-stage" id="stage5">
+                <div class="stage-title">
+                  <span>5</span>
+                  <div>
+                    <h3>前馈网络 FFN — "每个词独立思考"</h3>
+                    <p>注意力层负责"词与词之间的信息交流"——就像开会讨论。FFN 层负责"每个词自己对信息的非线性加工"——就像各自回去思考。<br>
+                    <strong>膨胀（W₁）：</strong>512 维 → 2048 维，把信息展开到高维空间，给模型更多"思考空间"。<br>
+                    <strong>ReLU 激活：</strong>负数变 0，正数不变。引入非线性——没有它，多层就退化成一层。你可以看到图中灰掉的柱子就是被 ReLU "杀死"的负值。<br>
+                    <strong>压缩（W₂）：</strong>2048 维 → 512 维，回到原来的维度，以便和残差连接相加。<br>
+                    <strong>交替结构：</strong>注意力（交流）→ FFN（思考）→ 注意力（再交流）→ FFN（再思考）... 6 层循环。<br>
+                    <em>论文 §3.3：FFN(x)=max(0, xW₁+b₁)W₂+b₂，d_ff=2048=4×d_model</em></p>
+                  </div>
+                </div>
+                <div class="ffn-flow" id="ffnFlow"></div>
+              </section>
+
+              <!-- 步骤 ⑥ 残差连接 -->
+              <section class="lens-stage" id="stage6">
+                <div class="stage-title">
+                  <span>6</span>
+                  <div>
+                    <h3>残差连接 Residual Connection — "高速公路"</h3>
+                    <p><strong>问题：</strong>6 层堆叠的网络，梯度从最后一层传回第一层会越来越小（梯度消失），前面层学不到东西。<br>
+                    <strong>解决方案：</strong>每层的输出 = LayerNorm(<strong>输入 + 子层输出</strong>)。那个 "+ 输入" 就是残差连接——像一条"高速公路"让信息绕过子层直接传到后面。<br>
+                    <strong>图中虚线箭头：</strong>x 分两路——一路经过 Attention/FFN 子层处理，一路直接跳过。最后在 ⊕ 处汇合相加。<br>
+                    <strong>LayerNorm：</strong>相加后做层归一化，把数值稳定在均值 0 方差 1 附近，防止数值爆炸。<br>
+                    <strong>类比：</strong>就像写论文——子层是你新写的内容，残差连接是保留原文草稿。最后把新旧融合（Add）+ 润色统一风格（LayerNorm）。<br>
+                    <em>论文 §3.1：每个子层外都有 Add & Norm</em></p>
+                  </div>
+                </div>
+                <div class="residual-diagram" id="residualDiagram"></div>
+              </section>
+
+              <!-- 步骤 ⑦ Encoder 层堆叠 -->
+              <section class="lens-stage" id="stage7">
+                <div class="stage-title">
+                  <span>7</span>
+                  <div>
+                    <h3>6 层 Encoder 堆叠 — "从浅到深，从局部到全局"</h3>
+                    <p>前面几步展示了<strong>一层</strong> Encoder。实际上有 <strong>6 层</strong> 堆叠在一起，每层的输出是下一层的输入。<br>
+                    <strong>拖动滑块或点击层卡片，观察注意力模式如何随层深变化：</strong><br>
+                    · <strong>第 1-2 层（浅层）：</strong>注意力集中在相邻词上——学"语法搭配"（比如"the + 名词"、"形容词 + 的 + 名词"）<br>
+                    · <strong>第 3-4 层（中层）：</strong>注意力开始扩散——学"句法结构"（主语-谓语-宾语关系）<br>
+                    · <strong>第 5-6 层（深层）：</strong>注意力聚焦到句子核心词——学"语义理解"（这句话到底在说什么）<br>
+                    <strong>这是可解释性研究的重要发现：</strong>Transformer 像人类阅读一样，先看局部词法，再理解句法，最后把握全局语义。<br>
+                    <em>论文 §3.1：Encoder 由 N=6 个相同层堆叠而成</em></p>
+                  </div>
+                </div>
+                <div class="layer-controls">
+                  <span class="layer-label" id="layerLabel">第 1 层 / 共 6 层</span>
+                  <input type="range" class="layer-slider" id="layerSlider" min="0" max="5" value="0" />
+                </div>
+                <div class="layer-mini-grid" id="layerMiniGrid"></div>
+                <div class="attention-heatmap layer-heat-detail" id="layerHeatDetail"></div>
+                <p class="stage-note" id="layerNote"></p>
+              </section>
+
+              <!-- 步骤 ⑧ Decoder 自回归生成 -->
+              <section class="decoder-stage" id="stage8">
+                <div class="decoder-main">
+                  <div>
+                    <p class="module-kicker">步骤 8</p>
+                    <h3>Decoder 自回归生成 — "一个字一个字地翻译"</h3>
+                    <p class="decoder-desc"><strong>训练 vs 推理：</strong>训练时，Decoder 看到完整的目标句子（Teacher Forcing），用 Subsequent Mask 防止偷看未来词。推理时，Decoder 只从 &lt;SOS&gt; 开始，每步生成一个词，再把生成的词喂回输入——这叫<strong>自回归</strong>。<br>
+                    <strong>每一步做什么：</strong>① 掩码自注意力看已生成的词（"我已经翻了哪些？"）→ ② 交叉注意力看 Encoder 输出（"原文说了什么？"）→ ③ FFN 加工 → ④ 输出投影得到词表概率 → ⑤ 选概率最高的词作为下一步输出<br>
+                    <strong>高亮的源语言词：</strong>展示当前解码步最关注的源语言 token——这就是"对齐"的可视化。<br>
+                    <strong>候选概率条：</strong>每步显示 top-3 候选词及概率，最高那个被选中加入译文。<br>
+                    <em>论文 §3.1 & inference：自回归生成 + Beam Search</em></p>
+                  </div>
+                  <div class="decoder-gen-area">
+                    <div class="gen-tokens" id="decoderGenerated"></div>
+                    <div class="gen-candidates" id="decoderCandidates"></div>
+                  </div>
+                  <div class="decoder-controls">
+                    <button class="ghost-button" id="decoderStepBtn" type="button">⏭ 单步</button>
+                    <button class="primary-button" id="decoderAutoBtn" type="button">▶ 自动播放</button>
+                    <button class="ghost-button" id="decoderResetBtn" type="button">↺ 重置</button>
+                  </div>
+                </div>
+                <div class="decoder-result-side">
+                  <p class="module-kicker">翻译结果</p>
+                  <h3 id="decoderResult">等待可视化结果</h3>
+                  <div class="decoder-beam" id="decoderBeam"></div>
+                </div>
+              </section>
+
+              <!-- 步骤 ⑨ 模型信息 -->
+              <section class="lens-stage" id="stage9">
+                <div class="stage-title">
+                  <span>9</span>
+                  <div>
+                    <h3>真实模型 vs 教学可视化 — "概念 vs 工业"</h3>
+                    <p><strong>重要区分：</strong>以上步骤 1-8 展示的是<strong>概念模拟</strong>——用简化的数学帮你理解 Transformer 的工作原理。实际翻译由 <strong>OpenNMT 训练的 Transformer</strong> 完成，模型权重存储在本地。<br>
+                    <strong>你电脑上运行的模型：</strong>6 层 Encoder + 6 层 Decoder，8 个注意力头（不是 4 个），d_model=512，FFN 隐藏层=2048，约 8200 万参数，模型文件 82MB。推理引擎是 CTranslate2（C++ 加速）。<br>
+                    <strong>模拟 vs 真实的区别：</strong>模拟用 4 个头展示概念；真实有 8 个头。模拟用伪随机数据生成注意力；真实模型的注意力是从千万级训练数据中学到的。模拟展示 1 层；真实堆叠了 6 层。但<strong>数学原理完全相同</strong>——都是 Attention(Q,K,V)=softmax(QKᵀ/√dₖ)·V。</p>
+                  </div>
+                </div>
+                <div id="modelInfoPanel"></div>
+              </section>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}?v=zh-ui-4"></script>
+  </body>
+</html>
