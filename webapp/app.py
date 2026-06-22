@@ -172,4 +172,7 @@ def translate_text():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5055, debug=False, use_reloader=False)
+    import os as _os
+    port = int(_os.environ.get("PORT", 5055))
+    host = "0.0.0.0" if _os.environ.get("RENDER") else "127.0.0.1"
+    app.run(host=host, port=port, debug=False, use_reloader=False)
