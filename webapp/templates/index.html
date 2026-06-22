@@ -12,7 +12,10 @@
       <section class="workspace" aria-label="Argos 本地翻译工作台">
         <header class="topbar">
           <div class="brand">
-            <img src="{{ url_for('static', filename='argos-icon.png') }}" alt="" />
+            <svg class="brand-logo" width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="44" height="44" rx="10" fill="#007f73"/>
+              <text x="22" y="29" text-anchor="middle" font-size="22" font-weight="900" fill="white" font-family="Inter,sans-serif">T</text>
+            </svg>
             <div>
               <p class="eyebrow">本地离线翻译工具</p>
               <h1>Argos 翻译工作台 <span style="color:#e36c4f;font-size:14px;vertical-align:super">V2</span></h1>
@@ -130,17 +133,16 @@
                 <div class="stage-title">
                   <span>1</span>
                   <div>
-                    <h3>分词 Tokenization + 位置编码 Positional Encoding</h3>
-                    <p><strong>分词：</strong>计算机不认识"字"，只认识"数字"。所以第一步把句子切成小片段（词元/token），每个词元分配一个编号。<br>
-                    <strong>位置编码：</strong>Transformer 没有"顺序"概念——它同时看所有词。为了让模型知道哪个词在前、哪个词在后，我们给每个位置加上一个独特的"位置指纹"（正弦波）。<br>
-                    <strong>上图曲线：</strong>4 条不同频率的正弦/余弦波。低频（波长长）区分"开头/中间/结尾"；高频（波长短）区分"相邻词的细微差异"。每条曲线上标记的点就是每个 token 取到的位置编码值。<br>
-                    <strong>下图矩阵：</strong>每个 token 在 8 个代表维度上的位置编码数值（绿色=正，橙色=负）。注意偶数列是 sin，奇数列是 cos。<br>
-                    <em>论文 §3.5：PE(pos,2i)=sin(pos/10000^(2i/d)), PE(pos,2i+1)=cos(pos/10000^(2i/d))</em></p>
+                    <h3>① 分词 Tokenization + 位置编码 Positional Encoding</h3>
+                    <p><strong>为什么要分词？</strong>计算机只认识数字。把句子切成小片段（token），每个 token 变成一个编号，才能输入模型。<br>
+                    <strong>为什么需要位置编码？</strong>Transformer 同时看所有词，没有"先后"概念。如果不加位置信息，"A 吃 B"和"B 吃 A"对它来说一模一样。<br>
+                    <strong>怎么做？</strong>给每个位置生成一个独特的"位置指纹"——用正弦/余弦波。不同频率的波叠在一起，每个位置就有了独一无二的编码。<br>
+                    <strong>下图怎么看：</strong>每行 = 一个 token 位置，每列 = 一个维度。颜色深浅 = 数值大小（绿正/橙负）。看同一列从上到下：低频维度（sin0/cos0）变化慢，高频维度（sin2/cos2）变化快——这就是"位置指纹"的奥秘。<br>
+                    <em>论文 §3.5：PE(pos,2i)=sin(pos/10000^(2i/d))</em></p>
                   </div>
                 </div>
                 <div class="token-rail" id="tokenRail"></div>
-                <canvas class="pe-canvas" id="peCanvas"></canvas>
-                <div class="vector-matrix pe-matrix-scroll" id="peMatrix"></div>
+                <div class="pe-simple-wrap" id="peSimple"></div>
               </section>
 
               <!-- 步骤 ② 词嵌入 + 位置编码相加 -->

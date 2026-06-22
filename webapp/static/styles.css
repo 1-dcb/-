@@ -719,19 +719,108 @@ output {
   align-items: center;
 }
 
-/* ── PE Canvas ────────────────────────────────────────────── */
-.pe-canvas {
-  width: 100%;
-  height: 160px;
+/* ── 品牌 Logo ───────────────────────────────────────────── */
+.brand-logo {
+  flex-shrink: 0;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0, 127, 115, 0.22);
+}
+
+/* ── 简化 PE 表格 ────────────────────────────────────────── */
+.pe-simple-wrap {
+  overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
-  margin-bottom: 14px;
 }
 
-.pe-matrix-scroll {
-  max-height: 260px;
-  overflow: auto;
+.pe-simple-header {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px 6px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.pe-simple-header,
+.pe-simple-row {
+  grid-template-columns: 90px repeat(6, minmax(62px, 1fr));
+  display: grid;
+  align-items: center;
+}
+
+.pe-dim-label {
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pe-dim-label small {
+  display: block;
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.pe-simple-row {
+  gap: 4px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #f0f4f2;
+}
+
+.pe-simple-row:last-of-type {
+  border-bottom: none;
+}
+
+.pe-token-label {
+  font-weight: 900;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pe-token-label em {
+  display: block;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.pe-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  min-height: 32px;
+}
+
+.pe-cell b {
+  font-size: 12px;
+  flex: 0 0 auto;
+  width: 36px;
+  text-align: right;
+}
+
+.pe-cell i {
+  flex: 1;
+  min-width: 4px;
+  border-radius: 3px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.pe-simple-footer {
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--soft);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
 }
 
 /* ── 词嵌入+PE 合并矩阵 ──────────────────────────────────── */

@@ -33,8 +33,7 @@ const labSwapBtn = document.querySelector("#labSwapBtn");
 const stageNavDots = document.querySelector("#stageNavDots");
 const autoPlayBtn = document.querySelector("#autoPlayBtn");
 const tokenRail = document.querySelector("#tokenRail");
-const peCanvas = document.querySelector("#peCanvas");
-const peMatrix = document.querySelector("#peMatrix");
+const peSimple = document.querySelector("#peSimple");
 const embeddingMatrix = document.querySelector("#embeddingMatrix");
 const combinedMatrix = document.querySelector("#combinedMatrix");
 const qkvGrid = document.querySelector("#qkvGrid");
@@ -155,103 +154,31 @@ function buildPositionalEncoding(numTokens, dims = 32) {
   return pe;
 }
 
-function drawPECanvas(tokens, pe) {
-  if (!peCanvas) return;
-  const canvas = peCanvas;
-  const ctx = canvas.getContext("2d");
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth;
-  const h = 160;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  canvas.style.height = h + "px";
-  ctx.scale(dpr, dpr);
+function renderPESimple(tokens, pe) {
+  if (!peSimple) return;
+  const showDims = 6; // sin0, cos0, sin1, cos1, sin2, cos2
+  const dimLabels = ['sin₀', 'cos₀', 'sin₁', 'cos₁', 'sin₂', 'cos₂'];
+  const dimNotes = ['波最长\n区分头尾', '波最长\n区分头尾', '波中等\n区分前后段', '波中等\n区分前后段', '波最短\n区分相邻', '波最短\n区分相邻'];
 
-  ctx.clearRect(0, 0, w, h);
-  const margin = { top: 20, right: 20, bottom: 30, left: 28 };
-  const pw = w - margin.left - margin.right;
-  const ph = h - margin.top - margin.bottom;
-  const numPos = pe.length;
-  const showDims = Math.min(4, pe[0]?.length || 0);
-  const colors = ["#007f73", "#e36c4f", "#6657c7", "#b98715"];
-
-  // grid
-  ctx.strokeStyle = "#e2e9e6";
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i <= 4; i++) {
-    const y = margin.top + (ph / 4) * i;
-    ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(w - margin.right, y); ctx.stroke();
-  }
-
-  // zero line
-  const zeroY = margin.top + ph / 2;
-  ctx.strokeStyle = "#ccc";
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(margin.left, zeroY); ctx.lineTo(w - margin.right, zeroY); ctx.stroke();
-
-  // curves
-  for (let d = 0; d < showDims; d++) {
-    ctx.strokeStyle = colors[d];
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    for (let p = 0; p < numPos; p++) {
-      const x = margin.left + (p / Math.max(1, numPos - 1)) * pw;
-      const val = pe[p][d];
-      const y = zeroY - val * (ph / 2.8);
-      if (p === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-
-  // token markers
-  tokens.forEach((_, idx) => {
-    const x = margin.left + (idx / Math.max(1, numPos - 1)) * pw;
-    ctx.strokeStyle = "rgba(0,0,0,0.25)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(x, margin.top); ctx.lineTo(x, h - margin.bottom); ctx.stroke();
-    ctx.setLineDash([]);
-    // dot at each intersection
-    for (let d = 0; d < showDims; d++) {
-      const val = pe[idx][d];
-      const y = zeroY - val * (ph / 2.8);
-      ctx.fillStyle = colors[d];
-      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-    }
-  });
-
-  // labels
-  ctx.fillStyle = "#61706c";
-  ctx.font = "11px Inter, sans-serif";
-  for (let d = 0; d < showDims; d++) {
-    ctx.fillStyle = colors[d];
-    ctx.fillText(`dim ${d}`, w - margin.right - 40, margin.top + d * 14 + 6);
-  }
-  ctx.fillStyle = "#61706c";
-  tokens.forEach((t, i) => {
-    const x = margin.left + (i / Math.max(1, numPos - 1)) * pw;
-    ctx.fillText(t.slice(0, 3), x - 6, h - 8);
-  });
-}
-
-function renderPEMatrix(tokens, pe) {
-  if (!peMatrix) return;
-  const showDims = Math.min(8, pe[0]?.length || 0);
-  peMatrix.style.gridTemplateColumns = `68px repeat(${showDims}, minmax(36px, 1fr))`;
-  peMatrix.innerHTML = `
-    <span class="heat-label">位置</span>
-    ${Array.from({ length: showDims }, (_, d) => {
-      const wave = d % 2 === 0 ? 'sin' : 'cos';
-      return `<span class="heat-label">${wave}(${Math.floor(d/2)})</span>`;
-    }).join("")}
+  peSimple.innerHTML = `
+    <div class="pe-simple-header">
+      <span>token</span>
+      ${dimLabels.map((l, i) => `<span class="pe-dim-label" title="${dimNotes[i]}">${l}<small>${dimNotes[i].split('\n')[0]}</small></span>`).join("")}
+    </div>
     ${tokens.map((t, pos) => `
-      <span class="heat-label row">${escapeHtml(t)}</span>
-      ${Array.from({ length: showDims }, (_, d) => {
-        const v = pe[pos][d];
-        const c = v >= 0 ? `rgba(0,127,115,${Math.abs(v).toFixed(2)})` : `rgba(227,108,79,${Math.abs(v).toFixed(2)})`;
-        return `<span class="heat-cell" style="background:${c}">${v.toFixed(2)}</span>`;
-      }).join("")}
+      <div class="pe-simple-row">
+        <span class="pe-token-label">${escapeHtml(t)} <em>pos${pos}</em></span>
+        ${Array.from({ length: showDims }, (_, d) => {
+          const v = pe[pos] ? pe[pos][d] : 0;
+          const abs = Math.abs(v);
+          const bg = v >= 0 ? `rgba(0,127,115,${(0.15 + abs * 0.8).toFixed(2)})` : `rgba(227,108,79,${(0.15 + abs * 0.8).toFixed(2)})`;
+          return `<span class="pe-cell" style="background:${bg}"><b>${v.toFixed(2)}</b><i style="height:${Math.round(abs * 100)}%"></i></span>`;
+        }).join("")}
+      </div>
     `).join("")}
+    <div class="pe-simple-footer">
+      低频（左两列）→ 粗粒度位置（头/中/尾）&nbsp;&nbsp;|&nbsp;&nbsp;高频（右两列）→ 细粒度位置（相邻词区分）
+    </div>
   `;
 }
 
@@ -819,8 +746,7 @@ function visualizeTransformerStage(model, stage, translationData) {
 
   switch (stage) {
     case 1:
-      drawPECanvas(model.tokens, model.pe);
-      renderPEMatrix(model.tokens, model.pe);
+      renderPESimple(model.tokens, model.pe);
       break;
     case 2:
       renderEmbeddings(model.tokens, model.embeddings);
