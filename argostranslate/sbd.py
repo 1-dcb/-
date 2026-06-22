@@ -9,11 +9,7 @@ try:
 except ImportError:
     spacy = None
 
-try:
-    import stanza
-except ImportError:
-    stanza = None
-
+import stanza
 from minisbd import SBDetect, models as minisbd_models
 
 from argostranslate import package, settings

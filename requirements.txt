@@ -1,5 +1,6 @@
 ctranslate2>=4.0,<5
 sentencepiece>=0.2.0,<0.3
+stanza==1.10.1
 packaging
 minisbd
 flask>=3.0
