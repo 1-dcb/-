@@ -289,7 +289,7 @@ function renderMultiHeadQKV(tokens, embeddings) {
   multiHeadGrid.innerHTML = HEAD_COLORS.map((hc, hi) => {
     const qkvList = embeddings.map(v => projectQkvMulti(v, hi));
     return `
-      <div class="multihead-card" style="border-left:3px solid ${hc.base}">
+      <div class="multihead-card" style="border-top:3px solid ${hc.base}">
         <div class="multihead-label" style="color:${hc.base}">头 ${hi} · ${HEAD_BIASES[hi].label}</div>
         <div class="mh-table">
           <div class="mh-header"><span></span><span>Q</span><span>K</span><span>V</span></div>
@@ -907,17 +907,26 @@ async function requestTranslation(text, source, target) {
 
 async function translateCurrentText() {
   const text = inputText.value.trim();
-  if (!text) { outputText.textContent = "请输入要翻译的文本。"; return; }
+  if (!text) {
+    outputText.textContent = "请在左侧输入要翻译的文本。";
+    return;
+  }
+  if (text.length > 5000) {
+    outputText.textContent = "文本过长，请控制在 5000 字符以内。";
+    return;
+  }
   setBusy(true);
-  outputText.textContent = "正在翻译...";
+  outputText.textContent = "翻译引擎正在处理...";
   try {
     const data = await requestTranslation(text, sourceLang.value, targetLang.value);
     outputText.textContent = data.translatedText;
-    engineMeta.textContent = `${data.engine === "Argos Translate" ? "Argos 离线翻译" : data.engine} - ${data.elapsedMs} ms`;
+    outputText.classList.add("translate-success");
+    setTimeout(() => outputText.classList.remove("translate-success"), 900);
+    engineMeta.textContent = `${data.engine === "Argos Translate" ? "Argos 离线翻译" : data.engine} • ${data.elapsedMs} ms`;
     if (data.detail) setupHint.textContent = data.detail;
   } catch (error) {
-    outputText.textContent = error.message;
-    engineMeta.textContent = "请求失败";
+    outputText.textContent = `翻译失败：${error.message || "请检查网络连接后重试。"}`;
+    engineMeta.textContent = "请求失败，可重试";
   } finally { setBusy(false); }
 }
 

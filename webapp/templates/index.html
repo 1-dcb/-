@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Argos 本地翻译工作台</title>
     <script>console.log('=== V2 HTML LOADED ===');</script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=zh-ui-4" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=zh-ui-9" />
   </head>
   <body>
     <main class="app-shell">
@@ -23,7 +23,7 @@
           </div>
           <div class="status-pill" id="statusPill">
             <span class="status-dot"></span>
-            <span id="statusText">正在检测引擎</span>
+            <span id="statusText">检测翻译引擎中</span>
           </div>
         </header>
 
@@ -72,7 +72,7 @@
                   <span>原文</span>
                   <button class="ghost-button" id="clearBtn" type="button">清空</button>
                 </div>
-                <textarea id="inputText" spellcheck="false" placeholder="输入要翻译的文本..."></textarea>
+                <textarea id="inputText" spellcheck="false" placeholder="输入要翻译的文本，支持中英文..."></textarea>
                 <footer>
                   <span id="inputCount">0 个字符</span>
                   <button class="primary-button" id="translateBtn" type="button">翻译</button>
@@ -166,10 +166,10 @@
                 <div class="stage-title">
                   <span>3</span>
                   <div>
-                    <h3>多头 Q/K/V 投影 — "从不同角度审视每个词"</h3>
-                    <p><strong>Q（Query，查询）：</strong>"我在找什么？" — 当前词想从其他词那里获取什么信息。<br>
-                    <strong>K（Key，键）：</strong>"我是什么？" — 每个词给自己贴的"标签"，用来和别人的 Q 匹配。<br>
-                    <strong>V（Value，值）：</strong>"我有什么？" — 每个词携带的实际信息内容。<br>
+                    <h3>多头 Q/K/V 投影，"从不同角度审视每个词"</h3>
+                    <p><strong>Q（Query，查询）：</strong>"我在找什么？"，当前词想从其他词那里获取什么信息。<br>
+                    <strong>K（Key，键）：</strong>"我是什么？"，每个词给自己贴的"标签"，用来和别人的 Q 匹配。<br>
+                    <strong>V（Value，值）：</strong>"我有什么？"，每个词携带的实际信息内容。<br>
                     <strong>多头：</strong>只做一次注意力不够——就像只从一个角度看一个物体。Transformer 用 8 个头（这里展示 4 个），每个头有自己的 W^Q、W^K、W^V 矩阵，相当于 8 个"专家"各自从不同角度审视同一句话。<br>
                     <strong>注意看：</strong>4 个头的 Q/K/V 柱子形状<strong>不一样</strong>——因为每个头用了不同的投影矩阵。这就是"不同视角"的数学体现。<br>
                     <em>论文 §3.2.2：MultiHead(Q,K,V) = Concat(head_1,...,head_h)·W^O</em></p>
@@ -184,7 +184,7 @@
                 <div class="stage-title">
                   <span>4</span>
                   <div>
-                    <h3>多头注意力场 — "谁和谁最相关？"</h3>
+                    <h3>多头注意力场，"谁和谁最相关？"</h3>
                     <p><strong>计算过程：</strong>Q·Kᵀ → 除以 √dₖ → softmax → 乘以 V。这就是著名的 Attention(Q,K,V)=softmax(QKᵀ/√dₖ)·V 公式。<br>
                     <strong>热力图怎么看：</strong>每一<strong>行</strong>表示"当前词在关注哪些词"。颜色越深、百分比越高 = 关注越强。对角线通常最亮（每个词最关注自己）。<br>
                     <strong>点击 4 个 mini 热力图切换头：</strong><br>
@@ -208,7 +208,7 @@
                 <div class="stage-title">
                   <span>5</span>
                   <div>
-                    <h3>前馈网络 FFN — "每个词独立思考"</h3>
+                    <h3>前馈网络 FFN，"每个词独立思考"</h3>
                     <p>注意力层负责"词与词之间的信息交流"——就像开会讨论。FFN 层负责"每个词自己对信息的非线性加工"——就像各自回去思考。<br>
                     <strong>膨胀（W₁）：</strong>512 维 → 2048 维，把信息展开到高维空间，给模型更多"思考空间"。<br>
                     <strong>ReLU 激活：</strong>负数变 0，正数不变。引入非线性——没有它，多层就退化成一层。你可以看到图中灰掉的柱子就是被 ReLU "杀死"的负值。<br>
@@ -225,7 +225,7 @@
                 <div class="stage-title">
                   <span>6</span>
                   <div>
-                    <h3>残差连接 Residual Connection — "高速公路"</h3>
+                    <h3>残差连接 Residual Connection，"高速公路"</h3>
                     <p><strong>问题：</strong>6 层堆叠的网络，梯度从最后一层传回第一层会越来越小（梯度消失），前面层学不到东西。<br>
                     <strong>解决方案：</strong>每层的输出 = LayerNorm(<strong>输入 + 子层输出</strong>)。那个 "+ 输入" 就是残差连接——像一条"高速公路"让信息绕过子层直接传到后面。<br>
                     <strong>图中虚线箭头：</strong>x 分两路——一路经过 Attention/FFN 子层处理，一路直接跳过。最后在 ⊕ 处汇合相加。<br>
@@ -242,7 +242,7 @@
                 <div class="stage-title">
                   <span>7</span>
                   <div>
-                    <h3>6 层 Encoder 堆叠 — "从浅到深，从局部到全局"</h3>
+                    <h3>6 层 Encoder 堆叠，"从浅到深，从局部到全局"</h3>
                     <p>前面几步展示了<strong>一层</strong> Encoder。实际上有 <strong>6 层</strong> 堆叠在一起，每层的输出是下一层的输入。<br>
                     <strong>拖动滑块或点击层卡片，观察注意力模式如何随层深变化：</strong><br>
                     · <strong>第 1-2 层（浅层）：</strong>注意力集中在相邻词上——学"语法搭配"（比如"the + 名词"、"形容词 + 的 + 名词"）<br>
@@ -266,7 +266,7 @@
                 <div class="decoder-main">
                   <div>
                     <p class="module-kicker">步骤 8</p>
-                    <h3>Decoder 自回归生成 — "一个字一个字地翻译"</h3>
+                    <h3>Decoder 自回归生成，"一个字一个字地翻译"</h3>
                     <p class="decoder-desc"><strong>训练 vs 推理：</strong>训练时，Decoder 看到完整的目标句子（Teacher Forcing），用 Subsequent Mask 防止偷看未来词。推理时，Decoder 只从 &lt;SOS&gt; 开始，每步生成一个词，再把生成的词喂回输入——这叫<strong>自回归</strong>。<br>
                     <strong>每一步做什么：</strong>① 掩码自注意力看已生成的词（"我已经翻了哪些？"）→ ② 交叉注意力看 Encoder 输出（"原文说了什么？"）→ ③ FFN 加工 → ④ 输出投影得到词表概率 → ⑤ 选概率最高的词作为下一步输出<br>
                     <strong>高亮的源语言词：</strong>展示当前解码步最关注的源语言 token——这就是"对齐"的可视化。<br>
@@ -295,7 +295,7 @@
                 <div class="stage-title">
                   <span>9</span>
                   <div>
-                    <h3>真实模型 vs 教学可视化 — "概念 vs 工业"</h3>
+                    <h3>真实模型 vs 教学可视化，"概念 vs 工业"</h3>
                     <p><strong>重要区分：</strong>以上步骤 1-8 展示的是<strong>概念模拟</strong>——用简化的数学帮你理解 Transformer 的工作原理。实际翻译由 <strong>OpenNMT 训练的 Transformer</strong> 完成，模型权重存储在本地。<br>
                     <strong>你电脑上运行的模型：</strong>6 层 Encoder + 6 层 Decoder，8 个注意力头（不是 4 个），d_model=512，FFN 隐藏层=2048，约 8200 万参数，模型文件 82MB。推理引擎是 CTranslate2（C++ 加速）。<br>
                     <strong>模拟 vs 真实的区别：</strong>模拟用 4 个头展示概念；真实有 8 个头。模拟用伪随机数据生成注意力；真实模型的注意力是从千万级训练数据中学到的。模拟展示 1 层；真实堆叠了 6 层。但<strong>数学原理完全相同</strong>——都是 Attention(Q,K,V)=softmax(QKᵀ/√dₖ)·V。</p>
@@ -309,6 +309,6 @@
       </section>
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=zh-ui-4"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=zh-ui-9"></script>
   </body>
 </html>
